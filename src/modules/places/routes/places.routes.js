@@ -21,7 +21,7 @@ const router = Router();
 
 router
   .route("/")
-  .get(authenticate, getAllPlaces)
+  .get(getAllPlaces)
   .post(validate(addPlaceSchema), authenticate, authorize(ROLES.ADMIN), addPlace);
 
 router

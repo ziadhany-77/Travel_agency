@@ -15,7 +15,7 @@ import { upload } from "../../../middlewares/upload.middleware.js";
 
 const router = Router();
 
-router.route("/").get(authenticate, authorize(ROLES.USER), getAllFlights);
+router.route("/").get(getAllFlights);
 
 router
   .route("/create")
