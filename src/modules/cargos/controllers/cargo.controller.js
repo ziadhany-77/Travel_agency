@@ -27,7 +27,7 @@ export const sendCargo = catchAsyncError(async (req, res) => {
     breakable,
     description,
   });
-  res.json({ message: "shipment will be sent soon" }, cargo);
+  res.json({ message: "shipment will be sent soon", cargo });
 });
 
 export const getReceivedCargo = catchAsyncError(async (req, res) => {

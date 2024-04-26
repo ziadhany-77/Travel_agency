@@ -16,7 +16,7 @@ export const addPlace = catchAsyncError(async (req, res) => {
 
 export const deletePlace = catchAsyncError(async (req, res) => {
   await placesMoodel.findByIdAndDelete(req.params.placeId);
-  res.json({ message: "place added sucessfully" });
+  res.json({ message: "place deleted sucessfully" });
 });
 
 export const updatePlace = catchAsyncError(async (req, res) => {
