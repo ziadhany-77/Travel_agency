@@ -3,11 +3,11 @@ import { CLASS } from "../../../../utils/enums.js";
 
 const ticketSchema = new mongoose.Schema(
   {
-    class: {
-      type: String,
-      enum: [CLASS.ECONOMY, CLASS.PREMIUM_ECONOMY, CLASS.BUSINESS, CLASS.PREMIUM_ECONOMY],
-      required: true,
-    },
+    // class: {
+    //   type: String,
+    //   enum: [CLASS.ECONOMY, CLASS.PREMIUM_ECONOMY, CLASS.BUSINESS, CLASS.PREMIUM_ECONOMY],
+    //   required: true,
+    // },
     seatNumber: {
       type: String,
     },

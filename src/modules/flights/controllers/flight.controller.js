@@ -3,6 +3,8 @@ import { catchAsyncError } from "../../../../utils/Errorhandeling.js";
 import flightModel from "../models/flight.model.js";
 import stripe from "../../../../utils/onlinePayment.js";
 import ticketModel from "../models/ticket.model.js";
+import userModel from "../../users/models/userModel.js";
+import { generateSeatNum } from "../utils/flight.utils.js";
 
 export const getAllFlights = catchAsyncError(async (req, res) => {
   const apiFeatures = new ApiFeatures(flightModel.find(), req.query)
@@ -47,13 +49,15 @@ export const addFlight = catchAsyncError(async (req, res) => {
 });
 
 export const makeOnlinePayment = catchAsyncError(async (req, res) => {
-  const ticket = await ticketModel.findOne(req.user.id);
+  const { flightId } = req.params.flightId;
+
+  const flight = await flightModel.findOne({ flightId });
   const session = await stripe.checkout.sessions.create({
     line_items: [
       {
         price_data: {
           currency: "EGP",
-          unit_amount: ticket.flightRef.discountedPrice * 100,
+          unit_amount: flight.discountedPrice * 100,
           product_data: {
             name: "Ticket cost",
           },
@@ -62,10 +66,36 @@ export const makeOnlinePayment = catchAsyncError(async (req, res) => {
       },
     ],
     mode: "payment",
-    success_url: "",
-    cancel_url: "",
-    client_reference_id: ticket._id,
+    success_url:
+      "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
+    cancel_url: "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
+    client_reference_id: req.user.id,
     customer_email: req.user.email,
+    metadata: {
+      flightRef: flight._id,
+    },
   });
   res.json({ session });
 });
+
+export const sendTicketInfo = async (data) => {
+  const { customer_email, metadata } = data;
+  const user = await userModel.findOne({ email: customer_email });
+  const flight = await flightModel.findById(metadata.flightRef);
+  const seatNumber = generateSeatNum();
+  const ticket = await ticketModel.create({
+    passenger: user._id,
+    flightRef: metadata.flightRef,
+    seatNumber,
+    isPaid: true,
+  });
+
+  transporter.sendMail({
+    from: process.env.EMAIL,
+    to: email,
+    subject: "Email verification",
+    text: `hello ${user.firstName} your ticket to ${flight.destination.name} is booked
+    succesfuly your seat is ${seatNumber} the flight will depature at ${flight.takeOffTime}
+    please enjoy`,
+  });
+};

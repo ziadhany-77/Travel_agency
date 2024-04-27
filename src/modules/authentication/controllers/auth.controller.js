@@ -10,16 +10,16 @@ export const signUp = catchAsyncError(async (req, res) => {
 
   const hashedPass = bcrybt.hashSync(password, +process.env.HASH_ROUNDS);
 
-  const token = jwt.sign({ email }, process.env.EMAIL_SECRET);
+  const emailToken = jwt.sign({ email }, process.env.EMAIL_SECRET);
 
   transporter.sendMail({
     from: process.env.EMAIL,
     to: email,
     subject: "Email verification",
     text: "Please validate you email address",
-    html: `<a href="${req.protocol}://${req.headers.host}/auth/validate/${token}">Click here to confirm your email address</a>`,
+    html: `<a href="${req.protocol}://${req.headers.host}/auth/validate/${emailToken}">Click here to confirm your email address</a>`,
   });
-  await userModel.create({
+  const user = await userModel.create({
     firstName,
     lastName,
     email,
@@ -29,8 +29,10 @@ export const signUp = catchAsyncError(async (req, res) => {
     role,
     gender,
   });
+  const { userName, _id: id } = user;
+  const token = jwt.sign({ userName, role, id, email }, process.env.TOKEN_SECRET);
 
-  res.status(201).json({ message: "signed up sucessfully" });
+  res.status(201).json({ message: "signed up sucessfully", token });
 });
 
 export const signIn = catchAsyncError(async (req, res) => {

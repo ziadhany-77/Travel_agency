@@ -7,6 +7,7 @@ export const addPlaceSchema = Joi.object({
   },
   params: {},
   query: {},
+  file: Joi.object().required(),
 });
 export const updatePlaceSchema = Joi.object({
   body: {

@@ -16,13 +16,22 @@ import {
   deletePlaceSchema,
   updatePlaceSchema,
 } from "../validations/places.vlidations.js";
+import { upload } from "../../../middlewares/upload.middleware.js";
+import { attachImage } from "../../images/middlewares/image.middlewares.js";
 
 const router = Router();
 
 router
   .route("/")
   .get(getAllPlaces)
-  .post(validate(addPlaceSchema), authenticate, authorize(ROLES.ADMIN), addPlace);
+  .post(
+    upload.single("coverImage"),
+    validate(addPlaceSchema),
+    authenticate,
+    authorize(ROLES.ADMIN),
+    attachImage("coverImage"),
+    addPlace
+  );
 
 router
   .route("/:placeId")

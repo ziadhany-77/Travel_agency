@@ -8,6 +8,11 @@ const placesSchema = new mongoose.Schema(
       maxLength: 20,
       required: true,
     },
+    coverImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "image",
+    },
     type: [String],
   },
   {
@@ -16,6 +21,11 @@ const placesSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+
+placesSchema.pre(/find/i, function (next) {
+  this.populate("coverImage");
+  next();
+});
 
 const placesMoodel = mongoose.model("places", placesSchema);
 
