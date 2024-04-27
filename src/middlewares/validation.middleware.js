@@ -16,7 +16,7 @@ const validate = (schema) => {
     );
     if (error) {
       throw new AppError(
-        error.detail.map((d) => d.message),
+        error.details.map((d) => d.message),
         400
       );
     }

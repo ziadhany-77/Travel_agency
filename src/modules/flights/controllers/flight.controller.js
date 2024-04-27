@@ -5,6 +5,7 @@ import stripe from "../../../../utils/onlinePayment.js";
 import ticketModel from "../models/ticket.model.js";
 import userModel from "../../users/models/userModel.js";
 import { generateSeatNum } from "../utils/flight.utils.js";
+import transporter from "../../../../utils/mail.js";
 
 export const getAllFlights = catchAsyncError(async (req, res) => {
   const apiFeatures = new ApiFeatures(flightModel.find(), req.query)
@@ -72,13 +73,14 @@ export const makeOnlinePayment = catchAsyncError(async (req, res) => {
     client_reference_id: req.user.id,
     customer_email: req.user.email,
     metadata: {
-      flightRef: flight._id,
+      flightRef: JSON.stringify(flight._id),
     },
   });
   res.json({ session });
 });
 
 export const sendTicketInfo = async (data) => {
+  console.log("7aga");
   const { customer_email, metadata } = data;
   const user = await userModel.findOne({ email: customer_email });
   const flight = await flightModel.findById(metadata.flightRef);
@@ -89,11 +91,11 @@ export const sendTicketInfo = async (data) => {
     seatNumber,
     isPaid: true,
   });
-
+  console.log("7aga");
   transporter.sendMail({
     from: process.env.EMAIL,
-    to: email,
-    subject: "Email verification",
+    to: customer_email,
+    subject: "flight ticket",
     text: `hello ${user.firstName} your ticket to ${flight.destination.name} is booked
     succesfuly your seat is ${seatNumber} the flight will depature at ${flight.takeOffTime}
     please enjoy`,
