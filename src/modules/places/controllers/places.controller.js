@@ -3,7 +3,7 @@ import { catchAsyncError } from "../../../../utils/Errorhandeling.js";
 import placesMoodel from "../models/places.model.js";
 
 export const getAllPlaces = catchAsyncError(async (req, res) => {
-  const apiFeatures = new ApiFeatures(placesMoodel.find(), req.query).paginate(5);
+  const apiFeatures = new ApiFeatures(placesMoodel.find(), req.query);
 
   const places = await apiFeatures.query;
   res.json(places);

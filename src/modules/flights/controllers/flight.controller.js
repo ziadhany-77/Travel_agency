@@ -80,7 +80,6 @@ export const makeOnlinePayment = catchAsyncError(async (req, res) => {
 });
 
 export const sendTicketInfo = async (data) => {
-  console.log("7aga");
   const { customer_email, metadata } = data;
   const user = await userModel.findOne({ email: customer_email });
   const flight = await flightModel.findById(metadata.flightRef);
@@ -91,7 +90,6 @@ export const sendTicketInfo = async (data) => {
     seatNumber,
     isPaid: true,
   });
-  console.log("7aga");
   transporter.sendMail({
     from: process.env.EMAIL,
     to: customer_email,
