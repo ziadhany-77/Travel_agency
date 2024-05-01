@@ -29,7 +29,6 @@ const bootstrap = (app) => {
       switch (event.type) {
         case "checkout.session.completed":
           const checkoutData = event.data.object;
-          console.log(checkoutData);
           await sendTicketInfo(checkoutData);
           break;
         default:
