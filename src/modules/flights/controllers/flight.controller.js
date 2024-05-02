@@ -81,8 +81,9 @@ export const makeOnlinePayment = catchAsyncError(async (req, res) => {
 
 export const sendTicketInfo = async (data) => {
   const { customer_email, metadata } = data;
+  const flightId = metadata.flightRef;
   const user = await userModel.findOne({ email: customer_email });
-  const flight = await flightModel.findById(metadata.flightRef);
+  const flight = await flightModel.findById({ flightId });
   const seatNumber = generateSeatNum();
   const ticket = await ticketModel.create({
     passenger: user._id,
