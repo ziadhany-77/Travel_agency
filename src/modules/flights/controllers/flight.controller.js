@@ -87,7 +87,7 @@ export const sendTicketInfo = async (data) => {
   const seatNumber = generateSeatNum();
   const ticket = await ticketModel.create({
     passenger: user._id,
-    flightRef: metadata.flightRef,
+    flightRef: flightId,
     seatNumber,
     isPaid: true,
   });
