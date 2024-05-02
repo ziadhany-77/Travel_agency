@@ -28,11 +28,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: [GENDER.MALE, GENDER.FEMALE],
       default: GENDER.MALE,
-      required: true,
     },
     dateOfBirth: {
       type: Date,
-      required: true,
     },
     email: {
       type: String,

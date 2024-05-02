@@ -22,7 +22,7 @@ export const signupSchema = Joi.object({
       .required(),
     password: Joi.string().required(),
     phoneNumber: Joi.string().required(),
-    dateOfBirth: Joi.date().required(),
+    dateOfBirth: Joi.date(),
     gender: Joi.string().valid(GENDER.MALE, GENDER.FEMALE),
     role: Joi.string().valid(ROLES.ADMIN, ROLES.USER),
   },
