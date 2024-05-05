@@ -1,9 +1,9 @@
 import { Router } from "express";
 import {
   addFlight,
+  bookFlight,
   getAllFlights,
   getFlight,
-  makeOnlinePayment,
 } from "../controllers/flight.controller.js";
 import { attachImage } from "../../images/middlewares/image.middlewares.js";
 import {
@@ -27,10 +27,12 @@ router
     addFlight
   );
 
+router.route("/book").post(authenticate, authorize(ROLES.USER), bookFlight);
+
 router.route("/:flightId").get(authenticate, authorize(ROLES.USER), getFlight);
 
-router
-  .route("/:flightId/book")
-  .post(authenticate, authorize(ROLES.USER), makeOnlinePayment);
+// router
+//   .route("/:flightId/book")
+//   .post(authenticate, authorize(ROLES.USER), makeOnlinePayment);
 
 export default router;

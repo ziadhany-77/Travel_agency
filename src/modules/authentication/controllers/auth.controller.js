@@ -29,8 +29,8 @@ export const signUp = catchAsyncError(async (req, res) => {
     role,
     gender,
   });
-  const { userName, _id: id } = user;
-  const token = jwt.sign({ userName, role, id, email }, process.env.TOKEN_SECRET);
+  const { _id: id } = user;
+  const token = jwt.sign({ firstName, role, id, email }, process.env.TOKEN_SECRET);
 
   res.status(201).json({ message: "signed up sucessfully", token });
 });
@@ -42,8 +42,8 @@ export const signIn = catchAsyncError(async (req, res) => {
   if (!user || !bcrybt.compareSync(password, user.password))
     throw new AppError("Wrong email or password");
 
-  const { userName, role, _id: id } = user;
-  const token = jwt.sign({ userName, role, id, email }, process.env.TOKEN_SECRET);
+  const { firstName, role, _id: id } = user;
+  const token = jwt.sign({ firstName, role, id, email }, process.env.TOKEN_SECRET);
   res.json({ token });
 });
 

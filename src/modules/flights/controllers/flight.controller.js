@@ -1,11 +1,12 @@
 import { ApiFeatures } from "../../../../utils/ApiFeatures.js";
-import { catchAsyncError } from "../../../../utils/Errorhandeling.js";
+import AppError, { catchAsyncError } from "../../../../utils/Errorhandeling.js";
 import flightModel from "../models/flight.model.js";
 import stripe from "../../../../utils/onlinePayment.js";
 import ticketModel from "../models/ticket.model.js";
 import userModel from "../../users/models/userModel.js";
 import { generateSeatNum } from "../utils/flight.utils.js";
 import transporter from "../../../../utils/mail.js";
+import placesMoodel from "../../places/models/places.model.js";
 
 export const getAllFlights = catchAsyncError(async (req, res) => {
   const apiFeatures = new ApiFeatures(flightModel.find(), req.query)
@@ -49,54 +50,65 @@ export const addFlight = catchAsyncError(async (req, res) => {
   res.json({ message: "flight created" });
 });
 
-export const makeOnlinePayment = catchAsyncError(async (req, res) => {
-  const { flightId } = req.params.flightId;
+// export const makeOnlinePayment = catchAsyncError(async (req, res) => {
+//   const { flightId } = req.params.flightId;
 
-  const flight = await flightModel.findOne({ flightId });
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price_data: {
-          currency: "EGP",
-          unit_amount: flight.discountedPrice * 100,
-          product_data: {
-            name: "Ticket cost",
-          },
-        },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-    success_url:
-      "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
-    cancel_url: "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
-    client_reference_id: req.user.id,
-    customer_email: req.user.email,
-    metadata: {
-      flightRef: JSON.stringify(flight._id),
-    },
+//   const flight = await flightModel.findOne({ flightId });
+//   const session = await stripe.checkout.sessions.create({
+//     line_items: [
+//       {
+//         price_data: {
+//           currency: "EGP",
+//           unit_amount: flight.discountedPrice * 100,
+//           product_data: {
+//             name: "Ticket cost",
+//           },
+//         },
+//         quantity: 1,
+//       },
+//     ],
+//     mode: "payment",
+//     success_url:
+//       "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
+//     cancel_url: "https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/",
+//     client_reference_id: req.user.id,
+//     customer_email: req.user.email,
+//     metadata: {
+//       flightRef: JSON.stringify(flight._id),
+//     },
+//   });
+//   res.json({ session });
+// });
+
+export const bookFlight = catchAsyncError(async (req, res) => {
+  const { sourse, destination, takeOffTime, landingTime } = req.body;
+  const from = await placesMoodel.findOne({ name: sourse });
+  const to = await placesMoodel.findOne({ name: destination });
+  const validTakeOffTime = new Date(takeOffTime);
+  console.log(validTakeOffTime);
+  const validLandingTime = new Date(landingTime);
+
+  const flight = await flightModel.findOne({
+    sourse: from._id,
+    destination: to._id,
+    takeOffTime: { $gte: validTakeOffTime },
+    landingTime: { $lte: validLandingTime },
   });
-  res.json({ session });
-});
-
-export const sendTicketInfo = async (data) => {
-  const { customer_email, metadata } = data;
-  const flightId = JSON.parse(metadata.flightRef);
-  const user = await userModel.findOne({ email: customer_email });
-  const flight = await flightModel.findById(flightId);
+  if (!flight) throw new AppError("sorry, no flight matches your search");
   const seatNumber = generateSeatNum();
   const ticket = await ticketModel.create({
-    passenger: user._id,
-    flightRef: flightId,
+    passenger: req.user.id,
+    flightRef: flight._id,
     seatNumber,
     isPaid: true,
   });
   transporter.sendMail({
     from: process.env.EMAIL,
-    to: customer_email,
+    to: req.user.email,
     subject: "flight ticket",
-    text: `hello ${user.firstName} your ticket to ${flight.destination.name} is booked
+    text: `hello ${req.user.firstName} your ticket to ${flight.destination.name} is booked
     succesfuly your seat is ${seatNumber} the flight will depature at ${flight.takeOffTime}
     please enjoy`,
   });
-};
+  res.json({ message: "booked" });
+});

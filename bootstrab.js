@@ -2,7 +2,7 @@ import express from "express";
 import AppError, { catchAsyncError } from "./utils/Errorhandeling.js";
 import V1router from "./src/Routes/V1.routes.js";
 import stripe from "stripe";
-import { sendTicketInfo } from "./src/modules/flights/controllers/flight.controller.js";
+// import { sendTicketInfo } from "./src/modules/flights/controllers/flight.controller.js";
 
 const bootstrap = (app) => {
   //express.raw take request without any modifcations
