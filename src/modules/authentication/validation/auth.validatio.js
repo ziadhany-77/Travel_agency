@@ -24,7 +24,6 @@ export const signupSchema = Joi.object({
     phoneNumber: Joi.string().required(),
     dateOfBirth: Joi.date(),
     gender: Joi.string().valid(GENDER.MALE, GENDER.FEMALE),
-    role: Joi.string().valid(ROLES.ADMIN, ROLES.USER),
   },
   params: {},
   query: {},
