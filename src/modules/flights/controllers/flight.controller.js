@@ -83,9 +83,10 @@ export const addFlight = catchAsyncError(async (req, res) => {
 export const bookFlight = catchAsyncError(async (req, res) => {
   const { sourse, destination, takeOffTime, landingTime } = req.body;
   const from = await placesMoodel.findOne({ name: sourse });
+  if (!from) throw new AppError("sourse location invalid");
   const to = await placesMoodel.findOne({ name: destination });
+  if (!to) throw new AppError("sourse location invalid");
   const validTakeOffTime = new Date(takeOffTime);
-  console.log(validTakeOffTime);
   const validLandingTime = new Date(landingTime);
 
   const flight = await flightModel.findOne({
@@ -95,6 +96,7 @@ export const bookFlight = catchAsyncError(async (req, res) => {
     landingTime: { $lte: validLandingTime },
   });
   if (!flight) throw new AppError("sorry, no flight matches your search");
+
   const seatNumber = generateSeatNum();
   const ticket = await ticketModel.create({
     passenger: req.user.id,
@@ -102,13 +104,25 @@ export const bookFlight = catchAsyncError(async (req, res) => {
     seatNumber,
     isPaid: true,
   });
+  await userModel.findByIdAndUpdate(req.user.id, { flights: flight._id });
+  await flightModel.findByIdAndUpdate(flight._id, { $inc: { seats: -1 } });
+
   transporter.sendMail({
     from: process.env.EMAIL,
     to: req.user.email,
     subject: "flight ticket",
     text: `hello ${req.user.firstName} your ticket to ${flight.destination.name} is booked
     succesfuly your seat is ${seatNumber} the flight will depature at ${flight.takeOffTime}
+    ticket referance ${ticket._id}
     please enjoy`,
   });
   res.json({ message: "booked" });
+});
+
+export const retriveTicket = catchAsyncError(async (req, res) => {
+  const { ticketRef } = req.body;
+  const ticket = await ticketModel.findById(ticketRef);
+  await flightModel.findByIdAndUpdate(ticket.flightRef, { $inc: { seats: 1 } });
+  await ticketModel.findByIdAndDelete(ticketRef);
+  res.json({ message: "flight canceld" });
 });

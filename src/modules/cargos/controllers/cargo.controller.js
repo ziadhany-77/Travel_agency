@@ -1,5 +1,6 @@
 import { ApiFeatures } from "../../../../utils/ApiFeatures.js";
-import { catchAsyncError } from "../../../../utils/Errorhandeling.js";
+import AppError, { catchAsyncError } from "../../../../utils/Errorhandeling.js";
+import placesMoodel from "../../places/models/places.model.js";
 import cargoModel from "../models/cargo.model.js";
 
 export const getAllCargos = catchAsyncError(async (req, res) => {
@@ -20,9 +21,13 @@ export const getSentCargos = catchAsyncError(async (req, res) => {
 export const sendCargo = catchAsyncError(async (req, res) => {
   const { from, to, description, breakable } = req.body;
   const { id } = req.user;
+  const source = placesMoodel.findOne({ name: from });
+  if (!source) throw new AppError("sourse location invalid");
+  const destination = placesMoodel.findOne({ name: to });
+  if (destination) throw new AppError("destination location invalid");
   const cargo = await cargoModel.create({
-    sourse: from,
-    destination: to,
+    source,
+    destination,
     sender: id,
     breakable,
     description,

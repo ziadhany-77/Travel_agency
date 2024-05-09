@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const cargoSchema = new mongoose.Schema(
   {
-    sourse: {
+    source: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "places",
       required: true,

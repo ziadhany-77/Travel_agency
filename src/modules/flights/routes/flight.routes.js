@@ -4,6 +4,7 @@ import {
   bookFlight,
   getAllFlights,
   getFlight,
+  retriveTicket,
 } from "../controllers/flight.controller.js";
 import { attachImage } from "../../images/middlewares/image.middlewares.js";
 import {
@@ -28,6 +29,7 @@ router
   );
 
 router.route("/book").post(authenticate, authorize(ROLES.USER), bookFlight);
+router.route("/retrive").post(authenticate, authorize(ROLES.USER), retriveTicket);
 
 router.route("/:flightId").get(authenticate, authorize(ROLES.USER), getFlight);
 
